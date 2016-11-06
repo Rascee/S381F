@@ -97,16 +97,16 @@ app.get('/api/read/:name/:value', function(req, res) {
         res.write(JSON.stringify(restaurants));
         res.end();
       });
-    } else if(req.params.name=='cuisine') {
-      restaurant.find({'cuisine':req.params.value}, function(err, restaurants) {
+    } else if(req.params.name=='borough') {
+      restaurant.find({'borough':req.params.value}, function(err, restaurants) {
         if(err) return console.log(err);
         db.close();
         res.writeHead(200, {"Content-Type": "application/json"});
         res.write(JSON.stringify(restaurants));
         res.end();
       });
-    } else if(req.params.name=='borough') {
-      restaurant.find({'borough':req.params.value}, function(err, restaurants) {
+    } else if(req.params.name=='cuisine') {
+      restaurant.find({'cuisine':req.params.value}, function(err, restaurants) {
         if(err) return console.log(err);
         db.close();
         res.writeHead(200, {"Content-Type": "application/json"});
