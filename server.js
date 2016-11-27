@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
+var session = require('cookie-session');
 var ObjectId = require('mongodb').ObjectID;
 var mongourl = 'mongodb://rascee:123@ds111178.mlab.com:11178/test2';
 var mongoose = require('mongoose');
@@ -10,24 +11,49 @@ var app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+app.use(session({name: 'session',keys: ['key1','key2']}));
 // Define virtual paths
 
 app.get('/', function(req, res) {
-  	res.redirect('/login');
+  res.redirect('/login');
 });
 
 app.get('/login', function(req, res) {
-  	res.sendFile(__dirname+'/login.html');
+  res.sendFile(__dirname+'/login.html');
 });
 
 app.post('/login', function(req, res) {
 	var username = req.body.username;
-	var password = req.body.password;
-	
+	var password = req.body.password;	
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    user.count({username: username}, function(err, num) {
+      if(num==0) {
+        db.close();
+        res.writeHead(200, {"Content-Type": "text/plain"});
+        res.end('Username is not existed');
+      } else {
+        user.findOne({username: username}, function(err, user) {
+          if(password==user.password) {
+            db.close();
+            req.session.username = username;
+            res.writeHead(200, {"Content-Type": "text/plain"});
+            res.end('Welcome, '+req.session.username);
+          } else {
+            db.close();
+            res.writeHead(200, {"Content-Type": "text/plain"});
+            res.end('Incorrect password');
+          }
+        });
+      }
+    });
+  });
 });
 
 app.get('/createaccount', function(req, res) {
-  	res.sendFile(__dirname+'/createaccount.html');
+  res.sendFile(__dirname+'/createaccount.html');
 });
 
 app.post('/createaccount', function(req, res) {
@@ -58,10 +84,10 @@ app.post('/createaccount', function(req, res) {
     var newUser = new user({username: req.body.username, password: req.body.password1});
       newUser.save(function(err) {
           if (err) throw err;
-          console.log('Insert was successful ');
+          console.log('Account created');
           db.close();
           res.writeHead(200, {"Content-Type": "text/plain"});
-          res.end('Insert was successful ');
+          res.end('Account created');
       });
     });
     /*var newUser = new user({username: req.body.username, password: req.body.password});
