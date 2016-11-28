@@ -5,22 +5,77 @@ var assert = require('assert');
 var session = require('cookie-session');
 var ObjectId = require('mongodb').ObjectID;
 var mongourl = 'mongodb://rascee:123@ds111178.mlab.com:11178/test2';
+//var fileUpload = require('express-fileupload');
 var mongoose = require('mongoose');
 var app = express();
 
+app.set('view engine', 'ejs');
 
-app.use(bodyParser.urlencoded({extended: true}));
+//app.use(fileUpload());
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(session({name: 'session',keys: ['key1','key2']}));
 // Define virtual paths
 
 app.get('/', function(req, res) {
-  res.redirect('/login');
+  if(req.session.username) 
+    res.redirect('/restaurants');
+  else 
+    res.redirect('/login');
 });
 
 app.get('/login', function(req, res) {
   res.sendFile(__dirname+'/login.html');
 });
+
+app.get('/restaurants', function(req, res) {
+  read_n_print(req, res);
+});
+
+app.post('/logout', function(req, res) {
+  req.session = null;
+  res.redirect('/login');
+});
+
+app.get('/create', function(req, res) {
+  res.sendFile(__dirname+'/create.html');
+});
+
+app.post('/create', function(req, res) {
+  console.log(req.files);
+  console.log(req.session.username);
+  var r = {}; 
+  r['address'] = {};
+  r.address.street = (req.body.street != null) ? req.body.street : null;
+  r.address.zipcode = (req.body.zipcode != null) ? req.body.zipcode : null;
+  r.address.building = (req.body.building != null) ? req.body.building : null;
+  r.address['coord'] = [];
+  r.address.coord.push(req.body.lon);
+  r.address.coord.push(req.body.lat);
+  r['borough'] = (req.body.borough != null) ? req.body.borough : null;
+  r['cuisine'] = (req.body.cuisine != null) ? req.body.cuisine : null;
+  r['name'] = (req.body.name != null) ? req.body.name : null;
+  r['rates'] = [];
+  r['uploaduser'] = req.session.username;
+  //r['img'] = {};
+  //r.img.data = (req.files.img != null) ? req.files.img : null;
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    //console.log('Prepare to create:\n');
+    var newR = new restaurant(r);
+    newR.save(function(err) {
+      if (err) throw err;
+      console.log('Restaurant Added');
+      db.close();
+      res.writeHead(200, {"Content-Type": "text/plain"});
+      res.end('Restaurant Added');
+    });
+  });
+  //res.writeHead(200, {"Content-Type": "text/plain"});
+  //res.end('gg');
+})
 
 app.post('/login', function(req, res) {
 	var username = req.body.username;
@@ -39,8 +94,9 @@ app.post('/login', function(req, res) {
           if(password==user.password) {
             db.close();
             req.session.username = username;
-            res.writeHead(200, {"Content-Type": "text/plain"});
-            res.end('Welcome, '+req.session.username);
+            //res.writeHead(200, {"Content-Type": "text/plain"});
+            //res.end('Welcome, '+req.session.username);
+            res.redirect('/restaurants');
           } else {
             db.close();
             res.writeHead(200, {"Content-Type": "text/plain"});
@@ -76,20 +132,20 @@ app.post('/createaccount', function(req, res) {
         res.end('Insert was successful');
   		  });
     });*/
-    mongoose.connect(mongourl);
-    var db = mongoose.connection;
-    db.on('error', console.error.bind(console,'connection error'));
-    db.once('open', function() {
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
     console.log('Prepare to create:\n');
     var newUser = new user({username: req.body.username, password: req.body.password1});
-      newUser.save(function(err) {
-          if (err) throw err;
-          console.log('Account created');
-          db.close();
-          res.writeHead(200, {"Content-Type": "text/plain"});
-          res.end('Account created');
-      });
+    newUser.save(function(err) {
+      if (err) throw err;
+      console.log('Account created');
+      db.close();
+      res.writeHead(200, {"Content-Type": "text/plain"});
+      res.end('Account created');
     });
+  });
     /*var newUser = new user({username: req.body.username, password: req.body.password});
     newUser.save(function(err) {
       if(err) {
@@ -105,9 +161,18 @@ var userSchema = new Schema({
   username: String,
   password: String
 });
+var restaurantSchema = new Schema({
+  name: {type: String, required: true},
+  cuisine: String,
+  borough: String,
+  address: {street: String, building: String, zipcode: String, coord:[Number]},
+  rates: [{rate:{type: Number, min: 0, max: 10}, user: String}],
+  img: {data: Buffer, contentType: String},
+  uploaduser: String
+});
 
 var user = mongoose.model('user', userSchema, 'user');
-
+var restaurant = mongoose.model('restaurant', restaurantSchema, 'restaurant');
 /*var insertUser = function(db, username, password, callback) {
    	db.collection('user').insertOne( {
    		'username':username,
@@ -118,6 +183,21 @@ var user = mongoose.model('user', userSchema, 'user');
     callback();
   });
 };*/
+
+function read_n_print(req, res) {
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    //console.log('Prepare to create:\n');
+    restaurant.find(function(err, restaurants) {
+      if(err) return console.log(err);
+      db.close();
+      res.render('list',{username:req.session.username, r:restaurants});
+      res.end();
+    })
+  });
+}
 
 var server = app.listen(8099, function () {
   var port = server.address().port;
