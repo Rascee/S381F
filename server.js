@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(session({name: 'session',keys: ['key1','key2']}));
 // Define virtual paths
 
-app.get('/', function(req, res) {a
+app.get('/', function(req, res) {
   res.redirect('/login');
 });
 
