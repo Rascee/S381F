@@ -1,0 +1,15 @@
+<HTML>
+<BODY>
+<head>
+  <title>Restaurant details</title>
+</head>
+  <H2>User:<%= username %></H2>
+  <br>
+  <input type="button" onclick="location.href='/create';" value="New" />
+  <form action='/logout' method='POST'>
+    <input type='submit' name='logout' value='Logout'>
+  </form>
+  <H1>Display <%= r.length %> restaurants</H1>
+  <br>
+</BODY>
+</HTML>
