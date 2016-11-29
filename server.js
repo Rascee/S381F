@@ -37,6 +37,15 @@ app.post('/logout', function(req, res) {
   res.redirect('/login');
 });
 
+app.get("/map", function(req,res) {
+	var lat  = req.query.lat;
+	var lon  = req.query.lon;
+	var zoom = req.query.zoom;
+
+	res.render("map.ejs",{lat:lat,lon:lon,zoom:zoom});
+	res.end();
+});
+
 app.get('/create', function(req, res) {
   res.sendFile(__dirname+'/create.html');
 });

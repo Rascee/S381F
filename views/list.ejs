@@ -5,7 +5,17 @@
 </head>
   <H2>User:<%= username %></H2>
   <br>
-  <input type="button" onclick="location.href='/create';" value="New" />
+  <form action="/search" method="GET">
+    <select name="searchby">
+	<option value="Milk">Name</option>
+	<option value="Cheese">Borough</option>
+	<option value="Bread">Cuisine</option>
+    </select>
+    <input type="text" name="searchtarget">
+    <input type="submit" name="search" value="Search">
+  </form>
+  <br>
+  <input type="button" onclick="location.href='/create';" value="Add restaurant" />
   <form action='/logout' method='POST'>
     <input type='submit' name='logout' value='Logout'>
   </form>
