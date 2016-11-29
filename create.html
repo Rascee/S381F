@@ -4,7 +4,7 @@
 
 <div><h1>Create New Restaurant</h1></div>
 
-<form action="/create" method="POST">
+<form action="/create" method="POST" encType="multipart/form-data">
   Restaurant name: <input name="name" type="text" required><br>
   Cuisine: <input name="cuisine" type="text"><br>
   Borough: <input name="borough" type="text"><br>
@@ -13,8 +13,8 @@
   Zipcode: <input name="zipcode" type="text"><br>
   GPS Coordinates (lon.): <input name="lon" type="text"><br>
   GPS Coordinates (lat.): <input name="lat" type="text"><br>
-  Photo: <input name="img" type="file"><br><br><br>
-  <input name='create' type='submit' value='Create'>
+  Photo: <input name="img" type="file" /><br><br><br>
+  <input name='create' type='submit' value='Create' />
 </form>
 
 </body>

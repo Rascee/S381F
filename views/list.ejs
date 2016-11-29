@@ -4,6 +4,7 @@
   <title>Restaurant details</title>
 </head>
   <H2>User:<%= username %></H2>
+< HEAD
   <br>
   <form action="/search" method="GET">
     <select name="searchby">
@@ -19,7 +20,14 @@
   <form action='/logout' method='POST'>
     <input type='submit' name='logout' value='Logout'>
   </form>
+  <input type="button" onclick="location.href='/create';" value="New" />
+  <input type="button" onclick="location.href='/logout';" value="Logout" />
   <H1>Display <%= r.length %> restaurants</H1>
+  <ol>
+  <% r.forEach(function(restaurant) { %>
+  <li><a href=/details?id=<%= restaurant.id %>><%= restaurant.name %></a></li>
+  <% });                        %>
+<ol>
   <br>
 </BODY>
 </HTML>
