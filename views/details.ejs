@@ -7,5 +7,14 @@
   Cuisine: <%= r.cuisine %><br>
   Borough: <%= r.borough %><br>
   Street: <%= r.address.street %><br>
+  Zipcode: <%= r.address.zipcode %><br>
+  Building: <%= r.address.building %><br>
+  GPS: [<%= r.address.coord %>]<br>
+  Rating:<br>
+  <% r.rates.forEach(function(rate) { %>
+  <ol><li><%= rate.rate %>(<%= rate.user %>)</li></ol>
+  <% });   %><br>
+  Create by: <%= r.uploaduser %><br>
+<a href=/map?lat=<%= r.address.coord[0] %>&lon=<%= r.address.coord[1] %>&title=<%= r.name %>>Google Map</a>
 </BODY>
 </HTML>

@@ -16,16 +16,12 @@
   </form>
   <br>
   <input type="button" onclick="location.href='/create';" value="Add restaurant" />
-  <form action='/logout' method='POST'>
-    <input type='submit' name='logout' value='Logout'>
-  </form>
-  <input type="button" onclick="location.href='/create';" value="New" />
   <input type="button" onclick="location.href='/logout';" value="Logout" />
   <H1>Display <%= r.length %> restaurants</H1>
   <ol>
   <% r.forEach(function(restaurant) { %>
   <li><a href=/details?id=<%= restaurant.id %>><%= restaurant.name %></a></li>
-  <% });                        %>
+  <% }) ; %>
 <ol>
   <br>
 </BODY>

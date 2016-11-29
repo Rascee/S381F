@@ -23,6 +23,11 @@ app.get('/', function(req, res) {
     res.redirect('/login');
 });
 
+app.get('/details', function(req, res){
+  //var id = req.query.id;
+  read_n_print2(req, res, {_id:req.query.id});
+});
+
 app.get('/login', function(req, res) {
   res.sendFile(__dirname+'/login.html');
 });
@@ -39,7 +44,7 @@ app.get('/logout', function(req, res) {
 app.get("/map", function(req,res) {
 	var lat  = req.query.lat;
 	var lon  = req.query.lon;
-	var zoom = req.query.zoom;
+	var zoom = 18;
 
 	res.render("map.ejs",{lat:lat,lon:lon,zoom:zoom});
 	res.end();
@@ -192,16 +197,34 @@ var restaurant = mongoose.model('restaurant', restaurantSchema, 'restaurant');
   });
 };*/
 
-function read_n_print(req, res) {
+function read_n_print(req, res, criteria) {
   mongoose.connect(mongourl);
   var db = mongoose.connection;
   db.on('error', console.error.bind(console,'connection error'));
   db.once('open', function() {
     //console.log('Prepare to create:\n');
-    restaurant.find(function(err, restaurants) {
+    restaurant.find(criteria, function(err, restaurants) {
       if(err) return console.log(err);
       db.close();
       res.render('list',{username:req.session.username, r:restaurants});
+      res.end();
+    })
+  });
+}
+
+function read_n_print2(req, res, criteria) {
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    //console.log('Prepare to create:\n');
+    restaurant.findOne(criteria, function(err, restaurants) {
+      if(err) return console.log(err);
+      db.close();
+      console.log(restaurants);
+      //console.log(JSON.stringify(restaurants[0].coord));
+      //var coord = JSON.stringify(restaurants.coord);
+      res.render('details',{username:req.session.username, r:restaurants});
       res.end();
     })
   });
