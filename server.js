@@ -5,14 +5,13 @@ var assert = require('assert');
 var session = require('cookie-session');
 var ObjectId = require('mongodb').ObjectID;
 var mongourl = 'mongodb://rascee:123@ds111178.mlab.com:11178/test2';
-//var fileUpload = require('express-fileupload');
+var fileUpload = require('express-fileupload');
 var mongoose = require('mongoose');
 var app = express();
 
 app.set('view engine', 'ejs');
 
-//app.use(fileUpload());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(fileUpload());
 app.use(bodyParser.json());
 app.use(session({name: 'session',keys: ['key1','key2']}));
 // Define virtual paths
@@ -32,7 +31,7 @@ app.get('/restaurants', function(req, res) {
   read_n_print(req, res);
 });
 
-app.post('/logout', function(req, res) {
+app.get('/logout', function(req, res) {
   req.session = null;
   res.redirect('/login');
 });
@@ -57,8 +56,8 @@ app.post('/create', function(req, res) {
   r['name'] = (req.body.name != null) ? req.body.name : null;
   r['rates'] = [];
   r['uploaduser'] = req.session.username;
-  //r['img'] = {};
-  //r.img.data = (req.files.img != null) ? req.files.img : null;
+  //r['img'] = (req.files.img.data.toString() != null) ? req.files.img.data.toString('base64') : null;
+  r['img'] = req.files.img.data.toString('base64');
   mongoose.connect(mongourl);
   var db = mongoose.connection;
   db.on('error', console.error.bind(console,'connection error'));
@@ -167,7 +166,7 @@ var restaurantSchema = new Schema({
   borough: String,
   address: {street: String, building: String, zipcode: String, coord:[Number]},
   rates: [{rate:{type: Number, min: 0, max: 10}, user: String}],
-  img: {data: Buffer, contentType: String},
+  img: String,
   uploaduser: String
 });
 
