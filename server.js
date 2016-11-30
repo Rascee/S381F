@@ -71,7 +71,10 @@ app.post('/create', function(req, res) {
   r['rates'] = [];
   r['uploaduser'] = req.session.username;
   //r['img'] = (req.files.img.data.toString() != null) ? req.files.img.data.toString('base64') : null;
-  r['img'] = req.files.img.data.toString('base64');
+  //r['img'] = req.files.img.data.toString('base64');
+  r['img'] = {};
+  r.img.data = req.files.img.data.toString('base64');
+  r.img.contentType = 'image/png';
   mongoose.connect(mongourl);
   var db = mongoose.connection;
   db.on('error', console.error.bind(console,'connection error'));
@@ -180,7 +183,7 @@ var restaurantSchema = new Schema({
   borough: String,
   address: {street: String, building: String, zipcode: String, coord:[Number]},
   rates: [{rate:{type: Number, min: 0, max: 10}, user: String}],
-  img: String,
+  img: {data: String, contentType: String},
   uploaduser: String
 });
 
@@ -220,6 +223,7 @@ function read_n_print2(req, res, criteria) {
     //console.log('Prepare to create:\n');
     restaurant.findOne(criteria, function(err, restaurants) {
       if(err) return console.log(err);
+      //var imgFile = new Buffer(restaurants.img.data, 'base64');
       db.close();
       console.log(restaurants);
       //console.log(JSON.stringify(restaurants[0].coord));
