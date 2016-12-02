@@ -16,6 +16,10 @@
   <ol><li><%= rate.rate %>(<%= rate.user %>)</li></ol>
   <% });   %><br>
   Create by: <%= r.uploaduser %><br>
-<a href=/map?lat=<%= r.address.coord[0] %>&lon=<%= r.address.coord[1] %>&title=<%= r.name %>>Google Map</a>
+<a href=/map?lat=<%= r.address.coord[0] %>&lon=<%= r.address.coord[1] %>&title=<%= r.name %>>Google Map</a><br>
+<input type="button" onclick="location.href='/rate?id=<%= r.id %>';" value="Rate" />
+<input type="button" onclick="location.href='/edit?id=<%= r.id %>';" value="Edit" />
+<input type="button" onclick="location.href='/delete?id=<%= r.id %>';" value="Delete" />
+<input type="button" onclick="location.href='/restaurants';" value="Go Back" />
 </BODY>
 </HTML>
