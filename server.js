@@ -36,6 +36,23 @@ app.get('/restaurants', function(req, res) {
   read_n_print(req, res);
 });
 
+app.get('/edit', function(req, res) {
+  req.session.restaurant_id = req.query.id;
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    //console.log('Prepare to create:\n');
+    restaurant.findOne({_id:ObjectId(req.session.restaurant_id)}, function(err, restaurants) {
+      if(err) return console.log(err);
+      db.close();
+      console.log(restaurants);
+      res.render('edit',{username:req.session.username, r:restaurants});
+      res.end();
+    });
+  });
+})
+
 app.get('/rate', function(req, res) {
   req.session.restaurant_id = req.query.id;
   res.set('content-type','text/html');
@@ -51,7 +68,7 @@ app.post('/rate', function(req, res) {
   var count;
   console.log(req.session);
   console.log(req.body.score);
-  MongoClient.connect(mongourl,function(err,db) {
+  /*MongoClient.connect(mongourl,function(err,db) {
     //console.log('Connected to mlab.com');
     assert.equal(null,err);
     findRateNum(db, req, res, function(result){
@@ -66,6 +83,23 @@ app.post('/rate', function(req, res) {
         res.end('Rate successfully');
     }
     db.close();
+  });*/
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    restaurant.aggregate({$unwind:'$rates'},{$match:{_id:ObjectId(req.session.restaurant_id), 'rates.user': req.session.username}}, function (err, result) {  
+      if(result.length==0) {
+        restaurant.update({_id:ObjectId(req.session.restaurant_id)}, {$push:{'rates':{rate:req.body.score, user: req.session.username}}}, function(err, doc) {
+          db.close();
+          console.log(doc);
+          res.send(doc);
+        })
+      } else {
+        db.close();
+        res.end('You are already rated the restaurant');
+      }
+    });
   });
 });
 
@@ -110,8 +144,20 @@ app.get('/create', function(req, res) {
 app.post('/create', function(req, res) {
   console.log(req.files);
   console.log(req.session.username);
-  var r = {}; 
-  r['address'] = {};
+  var coordArray = [req.body.lon, req.body.lat];
+  var r = new restaurant({
+    'name':req.body.name,
+    'cuisine':req.body.cuisine,
+    'borough':req.body.borough,
+    'address.street':req.body.street,
+    'address.zipcode':req.body.zipcode,
+    'address.building':req.body.building,
+    'address.coord':coordArray,
+    'uploaduser':req.session.username,
+    'img.data':req.files.img.data.toString('base64'),
+    'img.contentType':'image/png'
+  }); 
+  /*r['address'] = {};
   r.address.street = (req.body.street != null) ? req.body.street : null;
   r.address.zipcode = (req.body.zipcode != null) ? req.body.zipcode : null;
   r.address.building = (req.body.building != null) ? req.body.building : null;
@@ -127,14 +173,14 @@ app.post('/create', function(req, res) {
   //r['img'] = req.files.img.data.toString('base64');
   r['img'] = {};
   r.img.data = req.files.img.data.toString('base64');
-  r.img.contentType = 'image/png';
+  r.img.contentType = 'image/png';*/
   mongoose.connect(mongourl);
   var db = mongoose.connection;
   db.on('error', console.error.bind(console,'connection error'));
   db.once('open', function() {
     //console.log('Prepare to create:\n');
-    var newR = new restaurant(r);
-    newR.save(function(err) {
+    //var newR = new restaurant(r);
+    r.save(function(err) {
       if (err) throw err;
       console.log('Restaurant Added');
       db.close();
