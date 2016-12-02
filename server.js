@@ -36,6 +36,59 @@ app.get('/restaurants', function(req, res) {
   read_n_print(req, res);
 });
 
+app.get('/rate', function(req, res) {
+  req.session.restaurant_id = req.query.id;
+  res.set('content-type','text/html');
+  res.write('<html><head><title>Rate</title></head><body>');
+  res.write('<form action="/rate" method="POST">');
+  res.write('Score (1-10)<br>');
+  res.write('<input type="text" name="score"><br>');
+  res.write('<input type="submit" name="rate" value="Rate">');
+  res.end('</form></body></html>');
+});
+
+app.post('/rate', function(req, res) {
+  var count;
+  console.log(req.session);
+  console.log(req.body.score);
+  MongoClient.connect(mongourl,function(err,db) {
+    //console.log('Connected to mlab.com');
+    assert.equal(null,err);
+    findRateNum(db, req, res, function(result){
+      count = result.length;
+      console.log('count='+count);
+    });
+    if(count!=0) {
+      res.end('You have already rated the restaurant.');
+    } else {
+        db.collection('restaurant').update({_id: ObjectId(req.session.restaurant_id)}, 
+                                          {$push: {'rates':{rate: req.body.score, user: req.session.username}}});
+        res.end('Rate successfully');
+    }
+    db.close();
+  });
+});
+
+app.get('/delete', function(req, res) {
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    restaurant.findOneAndRemove({_id:ObjectId(req.query.id), uploaduser: req.session.username}, function (err, result) {  
+      db.close();
+      if(result==null) {
+        res.end('You have no right to do it');
+      } else {
+        var response = {
+          message: "Todo successfully deleted",
+          id: result._id
+        };
+      }
+      res.send(response);
+    });
+  });
+});
+
 app.get('/logout', function(req, res) {
   req.session = null;
   res.redirect('/login');
@@ -211,9 +264,21 @@ function read_n_print(req, res, criteria) {
       db.close();
       res.render('list',{username:req.session.username, r:restaurants});
       res.end();
-    })
+    });
   });
 }
+
+function findRateNum(db, req, res, callback) {
+  db.collection('restaurant').aggregate([{$unwind:"$rates"}, {$match:{_id: mongoose.Types.ObjectId(req.session.restaurant_id), 'rates.user': req.session.username}}], function(err, result) {
+    assert.equal(err, null);
+    callback(result);
+  });
+};
+
+function pushRate(db, req, res, callback) {
+  assert.equal(err, null);
+  callback(result);
+};
 
 function read_n_print2(req, res, criteria) {
   mongoose.connect(mongourl);
