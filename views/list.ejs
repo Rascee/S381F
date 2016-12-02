@@ -5,11 +5,11 @@
 </head>
   <H2>User:<%= username %></H2>
   <br>
-  <form action="/search" method="GET">
+  <form action="/read" method="GET">
     <select name="searchby">
-	<option value="Milk">Name</option>
-	<option value="Cheese">Borough</option>
-	<option value="Bread">Cuisine</option>
+	<option value="Name">Name</option>
+	<option value="Borough">Borough</option>
+	<option value="Cuisine">Cuisine</option>
     </select>
     <input type="text" name="searchtarget">
     <input type="submit" name="search" value="Search">

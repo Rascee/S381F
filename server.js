@@ -46,12 +46,47 @@ app.get('/edit', function(req, res) {
     restaurant.findOne({_id:ObjectId(req.session.restaurant_id)}, function(err, restaurants) {
       if(err) return console.log(err);
       db.close();
-      console.log(restaurants);
-      res.render('edit',{username:req.session.username, r:restaurants});
-      res.end();
+      if(req.session.username==restaurants.uploaduser) {
+        res.render('edit',{username:req.session.username, r:restaurants});
+        res.end();
+      } else {
+        res.end('You have no right to do it.');
+      }
     });
   });
-})
+});
+
+app.post('/edit', function(req, res) {
+  var coordArray = [req.body.lon, req.body.lat];
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    //console.log('Prepare to create:\n');
+    //var newR = new restaurant(r);
+  restaurant.update(
+    {_id: req.session.restaurant_id}, 
+    {$set: 
+      {
+        'name': req.body.name,
+        'cuisine': req.body.cuisine,
+        'borough':req.body.borough,
+        'address.street':req.body.street,
+        'address.zipcode':req.body.zipcode,
+        'address.building':req.body.building,
+        'address.coord':coordArray,
+        'uploaduser':req.session.username,
+        'img.data':req.files.img.data.toString('base64'),
+        'img.contentType':'image/png'
+      }
+    }, function(err, result) {
+      if(err) throw err;
+      console.log('Edit successfully.');
+      db.close();
+      res.end('Edit successfully.');
+    });
+  });
+});
 
 app.get('/rate', function(req, res) {
   req.session.restaurant_id = req.query.id;
@@ -65,7 +100,6 @@ app.get('/rate', function(req, res) {
 });
 
 app.post('/rate', function(req, res) {
-  var count;
   console.log(req.session);
   console.log(req.body.score);
   /*MongoClient.connect(mongourl,function(err,db) {
