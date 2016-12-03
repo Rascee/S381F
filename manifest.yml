@@ -1,0 +1,5 @@
+applications:
+- name: s381fpj
+  host: s381fpjdemo
+  memory: 512M
+  command: node server.js
