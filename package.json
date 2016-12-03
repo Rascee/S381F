@@ -1,0 +1,20 @@
+{
+  "name": "s381f",
+  "version": "1.0.0",
+  "description": "node.js project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Rascee/S381F.git"
+  },
+  "author": "ericyan, german cheung",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rascee/S381F/issues"
+  },
+  "homepage": "https://github.com/Rascee/S381F#readme"
+}
