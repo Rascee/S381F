@@ -208,7 +208,7 @@ app.post('/rate', function(req, res) {
         restaurant.update({_id:ObjectId(req.session.restaurant_id)}, {$push:{'rates':{rate:req.body.score, user: req.session.username}}}, function(err, doc) {
           db.close();
           console.log(doc);
-          res.send(doc);
+          res.end('Rate successfully.');
         })
       } else {
         db.close();
