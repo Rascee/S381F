@@ -23,6 +23,87 @@ app.get('/', function(req, res) {
     res.redirect('/login');
 });
 
+app.get('/search', function(req, res) {
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    //console.log('Prepare to create:\n');
+    if(req.query.searchby=='Name') {
+      restaurant.find({'name':req.query.searchtarget}, function(err, restaurants) {
+        if(err) return console.log(err);
+        db.close();
+        res.render('list',{username:req.session.username, r:restaurants});
+        res.end();
+      });
+    } else if(req.query.searchby=='cuisine') {
+      restaurant.find({'cuisine':req.query.searchtarget}, function(err, restaurants) {
+        if(err) return console.log(err);
+        db.close();
+        res.render('list',{username:req.session.username, r:restaurants});
+        res.end();
+      });
+    } else {
+      restaurant.find({'borough':req.query.searchtarget}, function(err, restaurants) {
+        if(err) return console.log(err);
+        db.close();
+        res.render('list',{username:req.session.username, r:restaurants});
+        res.end();
+      });
+    }
+  });
+});
+
+app.get('/api/read/:name/:value', function(req, res) {
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    //console.log('Prepare to create:\n');
+    if(req.params.name=='name') {
+      restaurant.find({'name':req.params.value}, function(err, restaurants) {
+        if(err) return console.log(err);
+        db.close();
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.write(JSON.stringify(restaurants));
+        res.end();
+      });
+    } else if(req.params.name=='cuisine') {
+      restaurant.find({'cuisine':req.params.value}, function(err, restaurants) {
+        if(err) return console.log(err);
+        db.close();
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.write(JSON.stringify(restaurants));
+        res.end();
+      });
+    } else {
+      restaurant.find({'cuisine':req.params.value}, function(err, restaurants) {
+        if(err) return console.log(err);
+        db.close();
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.send(JSON.stringify(restaurants));
+        res.end();
+      });
+    }
+  });
+});
+
+/*app.get('/api/read/:name/:value', function(req, res) {
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    //console.log('Prepare to create:\n');
+      restaurant.find({'name':req.params.value}, function(err, restaurants) {
+        if(err) return console.log(err);
+        db.close();
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.write(JSON.stringify(restaurants));
+        res.end();
+      });
+  });
+});*/
+
 app.get('/details', function(req, res){
   //var id = req.query.id;
   read_n_print2(req, res, {_id:req.query.id});
@@ -225,6 +306,40 @@ app.post('/create', function(req, res) {
   //res.writeHead(200, {"Content-Type": "text/plain"});
   //res.end('gg');
 })
+
+/*app.post('/api/create', function(req, res) {
+  //console.log(req.files);
+  //console.log(req.session.username);
+  var coordArray = [req.body.lon, req.body.lat];
+  var r = new restaurant({
+    'name':req.body.name,
+    'cuisine':req.body.cuisine,
+    'borough':req.body.borough,
+    'address.street':req.body.street,
+    'address.zipcode':req.body.zipcode,
+    'address.building':req.body.building,
+    'address.coord':coordArray,
+    'uploaduser':req.session.username,
+    'img':
+  }); 
+  mongoose.connect(mongourl);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console,'connection error'));
+  db.once('open', function() {
+    //console.log('Prepare to create:\n');
+    //var newR = new restaurant(r);
+    r.save(function(err, result) {
+      if (err) throw err;
+      console.log('Restaurant Added');
+      db.close();
+      res.writeHead(200, {"Content-Type": 'application/json'});
+      res.write(JSON.stringify(result));
+      res.end();
+    });
+  });
+  //res.writeHead(200, {"Content-Type": "text/plain"});
+  //res.end('gg');
+});*/
 
 app.post('/login', function(req, res) {
 	var username = req.body.username;
