@@ -139,34 +139,38 @@ app.get('/edit', function(req, res) {
 
 app.post('/edit', function(req, res) {
   var coordArray = [req.body.lon, req.body.lat];
-  mongoose.connect(mongourl);
-  var db = mongoose.connection;
-  db.on('error', console.error.bind(console,'connection error'));
-  db.once('open', function() {
-    //console.log('Prepare to create:\n');
-    //var newR = new restaurant(r);
-  restaurant.update(
-    {_id: req.session.restaurant_id}, 
-    {$set: 
-      {
-        'name': req.body.name,
-        'cuisine': req.body.cuisine,
-        'borough':req.body.borough,
-        'address.street':req.body.street,
-        'address.zipcode':req.body.zipcode,
-        'address.building':req.body.building,
-        'address.coord':coordArray,
-        'uploaduser':req.session.username,
-        'img.data':req.files.img.data.toString('base64'),
-        'img.contentType':'image/png'
-      }
-    }, function(err, result) {
-      if(err) throw err;
-      console.log('Edit successfully.');
-      db.close();
-      res.end('Edit successfully.');
+  if(req.body.name=="") {
+    res.end("Name should not be empty.");
+  } else {
+    mongoose.connect(mongourl);
+    var db = mongoose.connection;
+    db.on('error', console.error.bind(console,'connection error'));
+    db.once('open', function() {
+      //console.log('Prepare to create:\n');
+      //var newR = new restaurant(r);
+    restaurant.update(
+      {_id: req.session.restaurant_id}, 
+      {$set: 
+        {
+          'name': req.body.name,
+          'cuisine': req.body.cuisine,
+          'borough':req.body.borough,
+          'address.street':req.body.street,
+          'address.zipcode':req.body.zipcode,
+          'address.building':req.body.building,
+          'address.coord':coordArray,
+          'uploaduser':req.session.username,
+          'img.data':req.files.img.data.toString('base64'),
+          'img.contentType':'image/png'
+        }
+      }, function(err, result) {
+        if(err) throw err;
+        console.log('Edit successfully.');
+        db.close();
+        res.end('Edit successfully.');
+      });
     });
-  });
+  }
 });
 
 app.get('/rate', function(req, res) {
@@ -205,11 +209,15 @@ app.post('/rate', function(req, res) {
   db.once('open', function() {
     restaurant.aggregate({$unwind:'$rates'},{$match:{_id:ObjectId(req.session.restaurant_id), 'rates.user': req.session.username}}, function (err, result) {  
       if(result.length==0) {
-        restaurant.update({_id:ObjectId(req.session.restaurant_id)}, {$push:{'rates':{rate:req.body.score, user: req.session.username}}}, function(err, doc) {
-          db.close();
-          console.log(doc);
-          res.end('Rate successfully.');
-        })
+        if(req.body.score>=0&&req.body.score<=10) {
+          restaurant.update({_id:ObjectId(req.session.restaurant_id)}, {$push:{'rates':{rate:req.body.score, user: req.session.username}}}, function(err, doc) {
+            db.close();
+            console.log(doc);
+            res.end('Rate successfully.');
+          });
+        } else {
+          res.end('Rate should be 1-10');
+        }
       } else {
         db.close();
         res.end('You are already rated the restaurant');
@@ -228,12 +236,8 @@ app.get('/delete', function(req, res) {
       if(result==null) {
         res.end('You have no right to do it');
       } else {
-        var response = {
-          message: "Todo successfully deleted",
-          id: result._id
-        };
+        res.end('Restaurant removed');
       }
-      res.send(response);
     });
   });
 });
@@ -289,20 +293,24 @@ app.post('/create', function(req, res) {
   r['img'] = {};
   r.img.data = req.files.img.data.toString('base64');
   r.img.contentType = 'image/png';*/
-  mongoose.connect(mongourl);
-  var db = mongoose.connection;
-  db.on('error', console.error.bind(console,'connection error'));
-  db.once('open', function() {
-    //console.log('Prepare to create:\n');
-    //var newR = new restaurant(r);
-    r.save(function(err) {
-      if (err) throw err;
-      console.log('Restaurant Added');
-      db.close();
-      res.writeHead(200, {"Content-Type": "text/plain"});
-      res.end('Restaurant Added');
+  if(req.body.name=="") {
+    res.end("Name should not be empty.");
+  } else {
+    mongoose.connect(mongourl);
+    var db = mongoose.connection;
+    db.on('error', console.error.bind(console,'connection error'));
+    db.once('open', function() {
+      //console.log('Prepare to create:\n');
+      //var newR = new restaurant(r);
+      r.save(function(err) {
+        if (err) throw err;
+        console.log('Restaurant Added');
+        db.close();
+        res.writeHead(200, {"Content-Type": "text/plain"});
+        res.end('Restaurant Added');
+      });
     });
-  });
+  }
   //res.writeHead(200, {"Content-Type": "text/plain"});
   //res.end('gg');
 })

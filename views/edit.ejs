@@ -3,7 +3,7 @@
 <body>
 
 <div><h1>Edit Restaurant details</h1></div>
-
+<img src= "data:<%= r.img.contentType %>;base64,<%= r.img.data %>"><br>
 <form action="/edit" method="POST" encType="multipart/form-data">
   Restaurant name: <input name="name" type="text" value="<%= r.name %>" required><br>
   Cuisine: <input name="cuisine" type="text" value="<%= r.cuisine %>"><br>
