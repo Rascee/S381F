@@ -54,6 +54,36 @@ app.get('/search', function(req, res) {
   });
 });
 
+app.get('/api/create', function(req, res) {
+	var r = {};
+	r = req.body;
+	if (r.name != null) {
+	mongoose.connect(mongourl);
+	var db = mongoose.connection;
+	var restSchema = require('./restaurant');
+	db.on('eror', console.error.bind(console,'connection error'));
+	db.once('open', function() {
+		var newR = new Restaurant(r);
+		newR.save(function(err) {
+			if (err) {
+			db.close();
+			res.json({message: 'Insertion failed'});
+			}
+			else {
+			db.close();
+			res.json({
+				status: 'ok, _id:' +newR._id
+			});
+			}
+		});	
+	});
+	} else {
+	res.json({
+	status: 'failed'
+	});
+	}
+}
+
 app.get('/api/read/:name/:value', function(req, res) {
   mongoose.connect(mongourl);
   var db = mongoose.connection;
