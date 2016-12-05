@@ -77,7 +77,7 @@ app.get('/api/read/:name/:value', function(req, res) {
         res.end();
       });
     } else {
-      restaurant.find({'cuisine':req.params.value}, function(err, restaurants) {
+      restaurant.find({'borough':req.params.value}, function(err, restaurants) {
         if(err) return console.log(err);
         db.close();
         res.writeHead(200, {"Content-Type": "application/json"});
