@@ -82,7 +82,7 @@ app.get('/api/create', function(req, res) {
 	status: 'failed'
 	});
 	}
-}
+});
 
 app.get('/api/read/:name/:value', function(req, res) {
   mongoose.connect(mongourl);
