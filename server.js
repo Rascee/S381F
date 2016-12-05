@@ -105,7 +105,7 @@ app.get('/api/read/:name/:value', function(req, res) {
         res.write(JSON.stringify(restaurants));
         res.end();
       });
-    } else {
+    } else if(req.params.name=='borough') {
       restaurant.find({'borough':req.params.value}, function(err, restaurants) {
         if(err) return console.log(err);
         db.close();
