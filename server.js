@@ -54,7 +54,7 @@ app.get('/search', function(req, res) {
   });
 });
 
-app.get('/api/create', function(req, res) {
+app.post('/api/create', function(req, res) {
 	var r = {};
 	r = req.body;
 	if (r.name != null) {
