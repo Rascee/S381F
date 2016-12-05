@@ -60,10 +60,9 @@ app.post('/api/create', function(req, res) {
 	if (r.name != null) {
 	mongoose.connect(mongourl);
 	var db = mongoose.connection;
-	var restSchema = require('./restaurant');
 	db.on('eror', console.error.bind(console,'connection error'));
 	db.once('open', function() {
-		var newR = new Restaurant(r);
+		var newR = new restaurant(r);
 		newR.save(function(err) {
 			if (err) {
 			db.close();
