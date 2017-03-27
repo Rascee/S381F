@@ -534,4 +534,5 @@ function read_n_print2(req, res, criteria) {
 var server = app.listen(process.env.VCAP_APP_PORT||8099, function () {
   var port = server.address().port;
   //console.log('Server listening at ', port);
+  //test
 });
